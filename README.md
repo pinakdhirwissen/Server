@@ -1,2 +1,2 @@
-# order-system-server
-order-system-server With Spring boot application
+# wt-ticket-tool-server
+wt-ticket-tool-server With Spring boot application
