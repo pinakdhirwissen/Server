@@ -13,9 +13,8 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
-    stages {
-        stage('Clone') {
-        steps {
+    stages {        stage('Clone') {
+            steps {
                 echo 'Cloning source...'
                 git branch: 'main', url: 'https://github.com/pinakdhirwissen/Server.git'
             }
@@ -23,19 +22,22 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo 'Building project with Gradle...'
-                bat './gradlew clean build -x test'
-            }
-        }
-
-        stage('Test') {
+                dir('TicketingSystem') {
+                    echo 'Building project with Gradle...'
+                    bat 'gradlew clean build -x test'
+                }
+        }        stage('Test') {
             steps {
-                echo 'Running unit tests...'
-                bat './gradlew test'
+                dir('TicketingSystem') {
+                    echo 'Running unit tests...'
+                    bat 'gradlew test'
+                }
             }
         }
 
         stage('Build Docker Image') {
+            steps {
+                dir('TicketingSystem') {
             steps {
                 script {
                     bat 'docker version'
