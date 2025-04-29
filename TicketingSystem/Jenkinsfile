@@ -11,9 +11,8 @@ pipeline {
         DOCKER_IMAGE = 'pinakdhir/wt-ticketing-service'
         DOCKER_TAG = "${BUILD_NUMBER}"
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-    }
-
-    stages {        stage('Clone') {
+    }    stages {
+        stage('Clone') {
             steps {
                 echo 'Cloning source...'
                 git branch: 'main', url: 'https://github.com/pinakdhirwissen/Server.git'
@@ -26,7 +25,10 @@ pipeline {
                     echo 'Building project with Gradle...'
                     bat 'gradlew clean build -x test'
                 }
-        }        stage('Test') {
+            }
+        }
+
+        stage('Test') {
             steps {
                 dir('TicketingSystem') {
                     echo 'Running unit tests...'
@@ -38,26 +40,25 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('TicketingSystem') {
-            steps {
-                script {
-                    bat 'docker version'
-                    bat 'docker info'
-                    bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
-                    bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    script {
+                        bat 'docker version'
+                        bat 'docker info'
+                        bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                        bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+                    }
                 }
-            }
-        }
-
-        stage('Push to DockerHub') {
+            }        stage('Push to DockerHub') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
-                                                    usernameVariable: 'DOCKER_USERNAME', 
-                                                    passwordVariable: 'DOCKER_PASSWORD')]) {
-                        bat 'echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin'
-                        bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                        bat "docker push ${DOCKER_IMAGE}:latest"
-                        bat 'docker logout'
+                dir('TicketingSystem') {
+                    script {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', 
+                                                        usernameVariable: 'DOCKER_USERNAME', 
+                                                        passwordVariable: 'DOCKER_PASSWORD')]) {
+                            bat 'echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin'
+                            bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                            bat "docker push ${DOCKER_IMAGE}:latest"
+                            bat 'docker logout'
+                        }
                     }
                 }
             }
